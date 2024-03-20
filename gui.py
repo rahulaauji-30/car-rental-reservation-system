@@ -2,15 +2,42 @@ import json
 from tkinter import *
 from tkinter import messagebox
 from car import Car
-from smtplib import SMTP
+from tkcalendar import DateEntry
 
 
 class CarRental:
+    def __init__(self, car):
+        self.window = Tk()
+        self.car = car
+        self.window.title("Car Rental Reservation")
+        self.window.minsize(600, 500)
+        self.show_cars()
+        self.window.mainloop()
+
+    def show_cars(self):
+        def redirect(c):
+            self.window.destroy()
+            BookCars(self.car, c)
+
+        for car in self.car.cars:
+            Label(text=f"Make: {car["Make"]}").pack()
+            Label(text=f"Model: {car["model"]}").pack()
+            Label(text=f"Year of Manufacture:{car["year"]}").pack()
+            Label(text=f"Availability: {"yes" if car["availability"] else "no"}").pack()
+            Label(text=f"Insurance: {car["insurance"]}").pack()
+            Label(text=f"Deposit: {car["deposit"]}").pack()
+            Label(text=f"Delivery: {car["delivery"]}").pack()
+            Button(text="Book Now", command=lambda: redirect(car)).pack()
+
+
+class AddCars:
     def __init__(self):
         self.window = Tk()
         self.car = Car()
-        self.window.title("Car Rental Reservation")
+        self.window.title("Add Cars")
         self.window.minsize(600, 500)
+        self.car_add()
+        self.window.mainloop()
 
     def car_add(self):
         def add():
@@ -19,78 +46,100 @@ class CarRental:
             if user_choice:
                 self.car.get_cars(make.get(), model.get(), year.get(), fare.get(), deposit.get(), delivery.get())
                 messagebox.showinfo("Info", "Info got added", icon="info")
+                self.window.destroy()
+                CarRental(self.car)
 
-        Label(text="Carlow").grid(column=2, row=0)
-        Label(text="Make").grid(column=1, row=1)
+        Label(text="Carlow").pack()
+        Label(text="Make").pack()
         make = Entry()
-        Label(text="Model").grid(column=1, row=2)
+        make.pack()
+        Label(text="Model").pack()
         model = Entry()
-        Label(text="Year").grid(column=1, row=3)
+        model.pack()
+        Label(text="Year").pack()
         year = Entry()
-        Label(text="Fare").grid(column=1, row=4)
+        year.pack()
+        Label(text="Fare").pack()
         fare = Entry()
-        Label(text="Deposit").grid(column=1, row=5)
+        fare.pack()
+        Label(text="Deposit").pack()
         deposit = Entry()
-        Label(text="Delivery").grid(column=1, row=6)
+        deposit.pack()
+        Label(text="Delivery").pack()
         delivery = Entry()
-        Label().grid(column=0, row=7)
-        Button(text="Add", command=add).grid(column=2, row=8)
-        make.grid(column=2, row=1)
-        model.grid(column=2, row=2)
-        year.grid(column=2, row=3)
-        fare.grid(column=2, row=4)
-        deposit.grid(column=2, row=5)
-        delivery.grid(column=2, row=6)
+        delivery.pack()
+        Label().pack()
+        Button(text="Add", command=add).pack()
 
-    def run(self):
+
+class BookCars:
+    def __init__(self, car, c):
+        self.window = Tk()
+        self.car = car
+        self.window.title("Car Rental Reservation")
+        self.window.minsize(600, 500)
+        self.book_car(c)
         self.window.mainloop()
-
-    def show_cars(self):
-        for car in self.car.cars:
-            Label(text=car["Make"]).grid(column=0, row=1)
-            Label(text=car["model"]).grid(column=1, row=1)
-            Label(text=car["year"]).grid(column=2, row=1)
-            Label(text=car["availability"] if "yes" else "no").grid(column=3, row=1)
-            Label(text=car["insurance"]).grid(column=4, row=1)
-            Label(text=car["deposit"]).grid(column=5, row=1)
-            Label(text=car["delivery"]).grid(column=6, row=1)
-            Button(text="Book Now", command=lambda: self.book_car(car)).grid(column=7, row=1)
 
     def book_car(self, car):
         self.get_customer_detail(car)
-        messagebox.showinfo(message="Car Booked!")
 
     def get_customer_detail(self, car):
-        Label(text="Carlow").grid(column=2, row=0)
-        Label(text="Name").grid(column=1, row=2)
+        def redirect(names, phones, emails, deliverys, rets, ds):
+            self.window.destroy()
+            self.car.book_car(car["model"], names, phones, emails, deliverys, rets, ds)
+            CarRental(self.car)
+
+        Label(text="Name").pack()
         name = Entry()
-        name.grid(column=2, row=2)
-        Label(text="Phone").grid(column=1, row=3)
+        name.pack()
+        Label(text="Phone").pack()
         phone = Entry()
-        phone.grid(column=2, row=3)
-        Label(text="Email").grid(column=1, row=4)
+        phone.pack()
+        Label(text="Date").pack()
+        d = DateEntry(width=12, background='darkblue', foreground='white', borderwidth=2)
+        d.pack()
+        Label(text="Email").pack()
         email = Entry()
-        email.grid(column=2, row=4)
-        Label(text="Enter delivery location").grid(column=1, row=5)
+        email.pack()
+        Label(text="Enter delivery location").pack()
         delivery = Entry()
-        delivery.grid(column=2, row=5)
-        Label(text="Enter return location").grid(column=1, row=6)
+        delivery.pack()
+        Label(text="Enter return location").pack()
         return_loc = Entry()
-        return_loc.grid(column=2,row=6)
-        Label().grid(column=0, row=7)
+        return_loc.pack()
+        Label().pack()
 
-        Button(text="Add", command=lambda: self.car.generate_bill(car, name.get(), phone.get(), email.get(), delivery.get(), return_loc.get())).grid(
-            column=2, row=8)
-
-    def send_mail(self, name, c_email):
-        user = "rahulaauji71@gmail.com"
-        password = "kube kkdl uinf jcnd"
-        with SMTP('smtp.google.com', port=587) as smtp:
-            smtp.starttls()
-            smtp.login(user=user, password=password)
-            smtp.sendmail(from_addr=user, to_addrs=c_email, msg=f"")
+        Button(text="Book",
+               command=lambda: redirect(name.get(), phone.get(), email.get(), delivery.get(),
+                                        return_loc.get(), d.get())).pack()
 
 
-carRental = CarRental()
-carRental.show_cars()
-carRental.run()
+class Main:
+    def __init__(self):
+        self.car = Car()
+        self.window = Tk()
+        self.window.title("Car Rental Reservation")
+        self.window.minsize(600, 500)
+        self.menu()
+        self.window.mainloop()
+
+    def menu(self):
+        def choice(c):
+            if c.lower() == "admin":
+                self.window.destroy()
+                AddCars()
+            elif c.lower() == "rent":
+                self.window.destroy()
+                CarRental(self.car)
+            else:
+                Label(text="Please Add correct input").pack()
+
+        Label(text="Carlow.com", font=('Arial', 20)).pack()
+        Label(text="Type Rent(to rent a car) or Admin(to add car details)").pack()
+        ch = Entry()
+        ch.pack()
+        Button(text="Press", command=lambda: choice(ch.get())).pack()
+
+
+carRental = Main()

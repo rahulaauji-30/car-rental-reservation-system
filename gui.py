@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import messagebox
 from car import Car
 from tkcalendar import DateEntry
-
+from smtplib import SMTP
 
 class CarRental:
     def __init__(self, car):
@@ -20,15 +20,17 @@ class CarRental:
             BookCars(self.car, c)
 
         for car in self.car.cars:
-            Label(text=f"Make: {car["Make"]}").pack()
-            Label(text=f"Model: {car["model"]}").pack()
-            Label(text=f"Year of Manufacture:{car["year"]}").pack()
-            Label(text=f"Availability: {"yes" if car["availability"] else "no"}").pack()
-            Label(text=f"Insurance: {car["insurance"]}").pack()
-            Label(text=f"Deposit: {car["deposit"]}").pack()
-            Label(text=f"Delivery: {car["delivery"]}").pack()
-            Button(text="Book Now", command=lambda: redirect(car)).pack()
-
+            try:
+                Label(text=f"Make: {car['Make']}").pack()
+                Label(text=f"Model: {car['model']}").pack()
+                Label(text=f"Year of Manufacture:{car['year']}").pack()
+                Label(text=f"Availability: {'Yes' if car['availability'] else 'No'}").pack()
+                Label(text=f"Insurance: {car['insurance']}").pack()
+                Label(text=f"Deposit: {car['deposit']}").pack()
+                Label(text=f"Delivery: {car['delivery']}").pack()
+                Button(text="Book Now", command=lambda: redirect(car)).pack()
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred while displaying cars: {e}")
 
 class AddCars:
     def __init__(self):
@@ -41,13 +43,15 @@ class AddCars:
 
     def car_add(self):
         def add():
-            user_choice = messagebox.askquestion("Warning", "You are about to add the info are you sure?",
-                                                 icon="warning")
+            user_choice = messagebox.askquestion("Warning", "You are about to add the info are you sure?", icon="warning")
             if user_choice:
-                self.car.get_cars(make.get(), model.get(), year.get(), fare.get(), deposit.get(), delivery.get())
-                messagebox.showinfo("Info", "Info got added", icon="info")
-                self.window.destroy()
-                CarRental(self.car)
+                try:
+                    self.car.get_cars(make.get(), model.get(), year.get(), fare.get(), deposit.get(), delivery.get())
+                    messagebox.showinfo("Info", "Info got added", icon="info")
+                    self.window.destroy()
+                    CarRental(self.car)
+                except Exception as e:
+                    messagebox.showerror("Error", f"An error occurred while adding car: {e}")
 
         Label(text="Carlow").pack()
         Label(text="Make").pack()
@@ -71,7 +75,6 @@ class AddCars:
         Label().pack()
         Button(text="Add", command=add).pack()
 
-
 class BookCars:
     def __init__(self, car, c):
         self.window = Tk()
@@ -87,8 +90,11 @@ class BookCars:
     def get_customer_detail(self, car):
         def redirect(names, phones, emails, deliverys, rets, ds):
             self.window.destroy()
-            self.car.book_car(car["model"], names, phones, emails, deliverys, rets, ds)
-            CarRental(self.car)
+            try:
+                self.car.book_car(car["model"], names, phones, emails, deliverys, rets, ds)
+                CarRental(self.car)
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred while booking car: {e}")
 
         Label(text="Name").pack()
         name = Entry()
@@ -111,9 +117,7 @@ class BookCars:
         Label().pack()
 
         Button(text="Book",
-               command=lambda: redirect(name.get(), phone.get(), email.get(), delivery.get(),
-                                        return_loc.get(), d.get())).pack()
-
+               command=lambda: redirect(name.get(), phone.get(), email.get(), delivery.get(), return_loc.get(), d.get())).pack()
 
 class Main:
     def __init__(self):

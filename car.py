@@ -2,7 +2,8 @@ import json
 from tkinter import messagebox
 import threading
 from smtplib import SMTP
-
+import smtplib
+from smtplib import SMTPException
 
 class Car:
     def __init__(self):
@@ -60,7 +61,7 @@ class Car:
     def generate_bill(self, car, name, phone, email, delivery, pickup, date):
         total = car["fare"] + car["delivery"] + car["deposit"]
         messagebox.showwarning("Bill",
-                               f"Base Fare ₹{car["fare"]}\nDoorstep Delivery & Pickup ₹{car["delivery"]}\nInsurance & GST {car["insurance"]}\nRefundable security deposit {car["deposit"]}\nTotal ₹{total}")
+                               f"Base Fare ₹{car['fare']}\nDoorstep Delivery & Pickup ₹{car['delivery']}\nInsurance & GST {car['insurance']}\nRefundable security deposit {car['deposit']}\nTotal ₹{total}")
         self.booking_details.append({
             "name": name,
             "contact": {
@@ -72,8 +73,12 @@ class Car:
             "total": total,
             "car_booked": car["model"]
         })
-        self.send_mail(car, name, phone, email, delivery, pickup, total, date)
-        messagebox.showinfo(message="Car Booked! \nAn Detailed email sent to you!")
+        try:
+            self.send_mail(car, name, phone, email, delivery, pickup, total, date)
+            messagebox.showinfo(message="Car Booked! \nAn Detailed email sent to you!")
+        except Exception as e:
+            print(f"Error occurred while sending email: {e}")
+            messagebox.showerror("Email Error", message="An error occurred while sending the email. Please try again later.")
 
     def send_mail(self, car, name, phone, email, delivery, pickup, total, date):
         mail = f"""Subject: Booking Information\n\n
@@ -85,12 +90,12 @@ class Car:
     Pickup Location: {pickup}
     Pickup Date & Time: {date}
     Return Location: {delivery}
-    Vehicle Name: {car["model"]}
+    Vehicle Name: {car['model']}
 
     Payment Summary:
-    Rental Cost: {car["fare"]}
-    Deposit: {car["deposit"]}
-    Delivery: {car["delivery"]}
+    Rental Cost: {car['fare']}
+    Deposit: {car['deposit']}
+    Delivery: {car['delivery']}
     Total Charged: {total}
 
     If you have any questions or need to make changes to your reservation, please contact our customer support at [phone number] or [email address]. We wish you a safe and enjoyable journey!

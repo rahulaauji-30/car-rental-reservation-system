@@ -5,6 +5,7 @@ from car import Car
 from tkcalendar import DateEntry
 from smtplib import SMTP
 
+
 class CarRental:
     def __init__(self, car):
         self.window = Tk()
@@ -32,6 +33,7 @@ class CarRental:
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred while displaying cars: {e}")
 
+
 class AddCars:
     def __init__(self):
         self.window = Tk()
@@ -43,7 +45,8 @@ class AddCars:
 
     def car_add(self):
         def add():
-            user_choice = messagebox.askquestion("Warning", "You are about to add the info are you sure?", icon="warning")
+            user_choice = messagebox.askquestion("Warning", "You are about to add the info are you sure?",
+                                                 icon="warning")
             if user_choice:
                 try:
                     self.car.get_cars(make.get(), model.get(), year.get(), fare.get(), deposit.get(), delivery.get())
@@ -74,6 +77,7 @@ class AddCars:
         delivery.pack()
         Label().pack()
         Button(text="Add", command=add).pack()
+
 
 class BookCars:
     def __init__(self, car, c):
@@ -117,11 +121,37 @@ class BookCars:
         Label().pack()
 
         Button(text="Book",
-               command=lambda: redirect(name.get(), phone.get(), email.get(), delivery.get(), return_loc.get(), d.get())).pack()
+               command=lambda: redirect(name.get(), phone.get(), email.get(), delivery.get(), return_loc.get(),
+                                        d.get())).pack()
 
-class Main:
+
+class ReturnCar:
     def __init__(self):
         self.car = Car()
+        self.window = Tk()
+        self.window.title("Car Rental Reservation")
+        self.window.minsize(600, 500)
+        self.return_car()
+        self.window.mainloop()
+
+    def return_car(self):
+        def redirect(n):
+            if self.car.return_car(n):
+                self.window.destroy()
+                messagebox.showinfo(title="Return Car", message="Car returned Successfully")
+                Main(self.car)
+            else:
+                Label(text="User Does not exist!", fg="red").pack()
+
+        Label(text="Carlow.com", font=("Arial", 20)).pack()
+        Label(text="Enter the Name who have borrowed the car!").pack()
+        name = Entry()
+        Button(text="Return", command=lambda: redirect(name.get()))
+
+
+class Main:
+    def __init__(self, car):
+        self.car = car
         self.window = Tk()
         self.window.title("Car Rental Reservation")
         self.window.minsize(600, 500)
@@ -136,6 +166,9 @@ class Main:
             elif c.lower() == "rent":
                 self.window.destroy()
                 CarRental(self.car)
+            elif c.lower() == "return":
+                self.window.destroy()
+                ReturnCar()
             else:
                 Label(text="Please Add correct input").pack()
 

@@ -5,6 +5,7 @@ from smtplib import SMTP
 import smtplib
 from smtplib import SMTPException
 
+
 class Car:
     def __init__(self):
         self.cars = [{
@@ -78,7 +79,8 @@ class Car:
             messagebox.showinfo(message="Car Booked! \nAn Detailed email sent to you!")
         except Exception as e:
             print(f"Error occurred while sending email: {e}")
-            messagebox.showerror("Email Error", message="An error occurred while sending the email. Please try again later.")
+            messagebox.showerror("Email Error",
+                                 message="An error occurred while sending the email. Please try again later.")
 
     def send_mail(self, car, name, phone, email, delivery, pickup, total, date):
         mail = f"""Subject: Booking Information\n\n
@@ -122,12 +124,13 @@ class Car:
                 for car in self.cars:
                     if customer["car_booked"].lower() == car["model"].lower():
                         car["availability"] = True
-                        self.availability_mutex.acquire()  # Protect availability updates
+                        self.availability_mutex.acquire()
                         for car in self.cars:
                             if customer["car_booked"].lower() == car["model"].lower():
                                 car["availability"] = True
                         print("Car returned Successfully!")
                         self.availability_mutex.release()
                 print("Car returned Successfully!")
-                return
+                return True
         print(f"No Customer exist of name {name}")
+        return False
